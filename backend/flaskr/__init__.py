@@ -151,7 +151,7 @@ def create_app(test_config=None):
       except Exception:
             abort(400)
 
-
+  
   '''
   @TODO: 
   Create a POST endpoint to get questions based on a search term. 
@@ -162,25 +162,39 @@ def create_app(test_config=None):
   only question that include that string within their question. 
   Try using the word "title" to start. 
   '''
-  @app.route('/search-questions', methods=['POST'])
+  @app.route('/questions/search', methods=['POST'])
   def questions_search():    
-    search_term = request.json.get('searchTerm', None)
-    questions = Question.query.filter(Question.question.ilike('%{search_term}%')).all()
-    try:
-      if search_term is None:
+    # Get search term from request data
+    search_term = request.get_json().get('searchTerm', '')
+
+    # Return 422 status code if empty search term is sent
+    if search_term == '':
         abort(422)
-      else:
-        questions = Question.query.filter(Question.question.ilike('%{search_term}%')).all()
-        current_questions = paginate_questions(request, questions)      
-      return jsonify({
-        'success': True,
-        'questions': current_questions,
-        'total_quesitons': len(questions)
-      })
+
+    try:
+        # get all questions that has the search term substring
+        questions = Question.query.filter(Question.question.ilike("%{}%".format(search_term))).all()
+
+        # if there are no questions for search term return 404
+        if len(questions) == 0:
+            abort(404)
+
+        # paginate questions
+        paginated_questions = paginate_questions(request, questions)
+
+        # return response if successful
+        return jsonify({
+            'success': True,
+            'questions': paginated_questions,
+            'total_questions': len(Question.query.all()),
+            'current_category': None
+        }), 200
+
     except Exception:
-      abort(404)
-    
-    
+        # This error code is returned when 404 abort
+        # raises exception from try block
+        abort(404)
+
   '''
   @TODO: 
   Create a GET endpoint to get questions based on category. 
@@ -225,9 +239,7 @@ def create_app(test_config=None):
       if ((quiz_category is None) or (previous_questions is None)):
           abort(400)
       questions = None
-      if (quiz_category['id'] == 0):
-          questions = Question.query.order_by(Question.id).all()
-      else:
+      if (quiz_category['id'] != 0):
           questions = Question.query.filter_by(category=quiz_category['id']).all()
       questions_format = [question.format() for question in questions]
       potential_questions = [
