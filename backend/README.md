@@ -392,8 +392,9 @@ POST '/quizzes'
 * POST endpoint to get questions to play the quiz. It take category and previous question parameters   and return a random questions within the given category, if provided, and that is not one of the previous questions
 * Arguments : None
 * Returns: Questions for that category
-``` Response
- {
+
+  ``` Response
+    {
         "categories": {
         "1": "Science",
         "2": "Art",
@@ -410,7 +411,7 @@ POST '/quizzes'
         "question": "What is the largest lake in Africa?"
     },
     "success": true
-    ```
+  ```
     ## Errors
 
     ### Bad Request: 400
