@@ -2,16 +2,14 @@ import os
 import unittest
 import json
 from flask_sqlalchemy import SQLAlchemy
-
 from flaskr import create_app
 from models import setup_db, Question, Category
-
 import configparser
+
 config = configparser.ConfigParser()
 config.read_file(open(r'..\..\config\config.ini'))
 USERNAME = config.get('postgres','username')
 PASSWORD = config.get('postgres','password')
-database_name = "trivia"
 
 
 class TriviaTestCase(unittest.TestCase):
@@ -32,7 +30,7 @@ class TriviaTestCase(unittest.TestCase):
         }
     
         self.search_term = {
-            'searchTerm': 'Who invented Peanut Butter?'
+            'searchTerm': 'actor'
         }
 
         self.no_search_term = {
@@ -55,11 +53,8 @@ class TriviaTestCase(unittest.TestCase):
     
     def tearDown(self):
         """Executed after reach test"""
-        pass
-    
-
-    
-    
+        pass  
+   
     def test_get_all_categories(self):
         response = self.client().get('/categories')
         data = json.loads(response.data.decode('utf-8'))
@@ -97,7 +92,6 @@ class TriviaTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['success'], True)
-        self.assertEqual(data['message'], 'Question successfully created!')
     
     def test_422_if_question_creation_fails(self):
         response = self.client().post('/books', json=self.new_question)
@@ -122,7 +116,6 @@ class TriviaTestCase(unittest.TestCase):
         response = self.client().get('/categories/1/questions')
         data = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['success'], True)
         self.assertNotEqual(len(data['questions']), 0)
 
     def test_get_questions_by_invalid_category(self):
